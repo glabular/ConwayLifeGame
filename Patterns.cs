@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace ConwayLife
 {
+    //
+    // Almost everything in this class, including all properties and methods are written by another person!
+    // 
     public class Patterns
     {
         private const string NewLine = "\r\n";
@@ -21,18 +24,6 @@ xxx
 x
 ";
 
-        // Lives forever
-        public static string Square => @"
-xx
-xx
-";
-
-        // Oscilates
-        public static string ThreeInLine => @"
-
- xxx
-";
-
         // ???
         public static string Glider => @"
  x
@@ -41,35 +32,129 @@ xxx
 ";
         public static string Mine => @"
 x
-x
-x
-x
-
-x
-x
-x x x x x x x x x
-x  x xx xx x
-x x x x xxxx
-x x xxxx
-xxxx x x x x x x 
-xxxx x xxxxxxxx
-x
-x
-x
-xx x x xxx x  x
-x x 
-x 
-x 
-x 
-x
-x
-
-x
+ x
+  x
+   x
 ";
 
         public static string Line(int n)
         {
             return NewLine + new string('x', n) + NewLine;
+        }
+
+        public static string StraightCross(int sideSize)
+        {
+            var pattern = new StringBuilder();
+            pattern.Append(NewLine);
+
+            for (var i = 0; i < sideSize; i++)
+            {
+                pattern.Append(new string(' ', sideSize));
+                pattern.Append('x');
+                pattern.AppendLine(new string(' ', sideSize));
+            }
+
+            pattern.AppendLine(new string('x', 2 * sideSize + 1));
+
+            for (var i = 0; i < sideSize; i++)
+            {
+                pattern.Append(new string(' ', sideSize));
+                pattern.Append('x');
+                pattern.AppendLine(new string(' ', sideSize));
+            }
+
+            return pattern.ToString();
+        }
+
+        public static string ObliqueCross(int sideSize)
+        {
+            var pattern = new StringBuilder();
+            pattern.Append(NewLine);
+
+            for (var i = 0; i < sideSize; i++)
+            {
+                pattern.Append(new string(' ', i));
+                pattern.Append('x');
+                pattern.Append(new string(' ', sideSize - i - 1));
+                pattern.Append(new string(' ', 1));
+                pattern.Append(new string(' ', sideSize - i - 1));
+                pattern.AppendLine("x");
+            }
+
+            pattern.Append(new string(' ', sideSize));
+            pattern.AppendLine("x");
+
+            for (var i = sideSize - 1; i >= 0; i--)
+            {
+                pattern.Append(new string(' ', i));
+                pattern.Append('x');
+                pattern.Append(new string(' ', sideSize - i - 1));
+                pattern.Append(new string(' ', 1));
+                pattern.Append(new string(' ', sideSize - i - 1));
+                pattern.AppendLine("x");
+            }
+
+            return pattern.ToString();
+        }
+
+        public static string EightCross(int sideSize)
+        {
+            var straightCrossPattern = StraightCross(sideSize);
+            var obliqueCrossPattern = ObliqueCross(sideSize);
+
+            return UnitePatterns(straightCrossPattern, obliqueCrossPattern);
+        }
+
+        private static string UnitePatterns(string pattern1, string pattern2)
+        {
+            // Turn one-string pattern into lines
+            var pattern1Lines = pattern1.Split("\r\n").ToList();
+            var pattern2Lines = pattern2.Split("\r\n").ToList();
+         
+            // Make patterns have the same number of lines (empty lines included)
+            var maxNumberOfLines = Math.Max(pattern1Lines.Count, pattern2Lines.Count);
+            for (var lineNumber = 0; lineNumber < maxNumberOfLines; lineNumber++)
+            {
+                if (pattern1Lines.Count <= lineNumber)
+                {
+                    pattern1Lines.Add(string.Empty);
+                }
+
+                if (pattern2Lines.Count <= lineNumber)
+                {
+                    pattern2Lines.Add(string.Empty);
+                }
+            }
+
+            // Make all lines have the same length (trailing spaces included)
+            var maxLineLength = pattern1Lines.Select(line => line.Length)
+                .Union(pattern2Lines.Select(line => line.Length))
+                .Max();        
+            for (var lineNumber = 0; lineNumber < maxNumberOfLines; lineNumber++)
+            {
+                pattern1Lines[lineNumber] = pattern1Lines[lineNumber].PadRight(maxLineLength);
+                pattern2Lines[lineNumber] = pattern2Lines[lineNumber].PadRight(maxLineLength);
+            }
+
+            // Uniite lines
+            var unitedPattern = new StringBuilder();
+            for (var lineNumber = 0; lineNumber < maxNumberOfLines; lineNumber++)
+            {
+                var pattern1Line = pattern1Lines[lineNumber];
+                var pattern2Line = pattern2Lines[lineNumber];
+
+                for (var charIndex = 0; charIndex < pattern1Line.Length; charIndex++)
+                {
+                    var pattern1Char = pattern1Line[charIndex];
+                    var pattern2Char = pattern2Line[charIndex];
+                    var newChar = pattern1Char == ' ' && pattern2Char == ' ' ? ' ' : 'x';
+                    unitedPattern.Append(newChar);
+                }
+
+                unitedPattern.AppendLine();
+            }
+
+            return unitedPattern.ToString();
         }
 
         public static string Cube(int n)

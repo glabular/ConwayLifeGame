@@ -17,17 +17,76 @@ namespace ConwayLife
         private int _rows;
         private int _columns;
         private CellStatus[,] _currentStateOfField;
-        private CellStatus[,] _temporaryStateOfField;
-        private long _generation = 0;
-        public bool allDead;
+        private long _generation;
+        private Dictionary<uint, long> _dictionary;
+        private Func<int, int, CellStatus[,], Func<int, int, int, int, CellStatus[,], int>, CellStatus[,]> _surviveDieOrBorn;
+        private Func<int, int, int, int, CellStatus[,], int> _getNeighboiursNumber;
 
-
-        public Field(int rows, int columns)
+        public Field(
+            int rows, 
+            int columns, 
+            Func<int, int, CellStatus[,], Func<int, int, int, int, CellStatus[,], int>, CellStatus[,]> surviveDieOrBorn, 
+            Func<int, int, int, int, CellStatus[,], int> getNeighboiursNumber)
         {
+            _dictionary = new Dictionary<uint, long>();
             _rows = rows;
             _columns = columns;
+            _generation = 1;
+            _surviveDieOrBorn = surviveDieOrBorn;
+            _getNeighboiursNumber = getNeighboiursNumber;
             _currentStateOfField = new CellStatus[_rows, _columns];
-            _temporaryStateOfField = new CellStatus[_rows, _columns];
+        }
+
+        public int AliveCells // Alive cell is every cell except empty one. Immortal cells are alive cells too.
+        {
+            get
+            {
+                var aliveCellsNumber = 0;
+
+                foreach (var item in _currentStateOfField)
+                {
+                    if (item != CellStatus.Empty)
+                    {
+                        aliveCellsNumber++;
+                    }
+                }
+
+                return aliveCellsNumber;
+            }
+        }
+
+        public long CycleLength { get; private set; }
+
+        public bool AllAreDead => AliveCells == 0;
+
+        public bool CycleAchieved { get; private set; }
+
+        public long Generation
+        {
+            get 
+            {
+                return _generation; 
+            }
+
+            private set 
+            {
+                if (!CycleAchieved)
+                {
+                    _generation = value;
+                }            
+            }
+        }
+
+        public void MakeMove()
+        {
+            Show();
+
+            if (!CycleAchieved)
+            {
+                FillHashDict();
+            }
+
+            CalculateNextGeneration();
         }
 
         public void InitializeLife(string generationZeroPattern)
@@ -66,108 +125,26 @@ namespace ConwayLife
             }
         }
 
-        public void InitializeLife(params PointOnBoard[] pointWithLife)
-        {
-            // Заполнение массива принятыми точками при инициализации жизни в главной программе.
-            foreach (var point in pointWithLife)
-            {
-                _currentStateOfField[point.Row, point.Column] = CellStatus.Alive;
-            }
-
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    for (int j = 0; j < 20; j++)
-            //    {
-            //        _currentStateOfField[i, j] = true;
-            //    }
-            //}
-
-
-        }
-
-        public void SurviveDieOrBorn()
-        {
-            for (int i = 0; i < _rows; i++)
-            {
-                for (int j = 0; j < _columns; j++)
-                {
-                    var numberOfNeighbours = GetNeighboursNumber(i, j);
-                    switch (_currentStateOfField[i, j])
-                    {
-                        case CellStatus.Alive:
-                            if (numberOfNeighbours == 2 || numberOfNeighbours == 3)
-                            {
-                                _temporaryStateOfField[i, j] = CellStatus.Alive;
-                            }
-                            else
-                            {
-                                _temporaryStateOfField[i, j] = CellStatus.Empty;
-                            }
-
-                            break;
-
-                        case CellStatus.Empty:
-                            if (numberOfNeighbours == 3)
-                            {
-                                _temporaryStateOfField[i, j] = CellStatus.Alive;
-                            }
-
-                            break;
-
-                        case CellStatus.Immortal:
-                            _temporaryStateOfField[i, j] = CellStatus.Immortal;
-                            break;
-                    }
-                }
-            }
-
-            for (int i = 0; i < _rows; i++)
-            {
-                for (int j = 0; j < _columns; j++)
-                {
-                    _currentStateOfField[i, j] = _temporaryStateOfField[i, j];
-                }
-            }
-
-            _generation++;
-        }
-
         public void SetImmortalCell(int row, int column)
         {
             _currentStateOfField[row, column] = CellStatus.Immortal;
         }
 
-        private int GetNeighboursNumber(int row, int column)
+        public void CalculateNextGeneration()
         {
-            int neighbours = 0;
-            foreach (var x in new[] { -1, 0, 1 })
-            {
-                foreach (var y in new[] { -1, 0, 1 })
-                {
-                    var scanPoint = new PointOnBoard
-                    {
-                        Column = (column + x + _columns) % _columns,
-                        Row = (row + y + _rows) % _rows
-                    };
+            var temporaryStateOfField = _surviveDieOrBorn(_rows, _columns, _currentStateOfField, _getNeighboiursNumber);
 
-                    if (IsPointValid(scanPoint)) // если проверяемая точка не является равной текущей точке.
-                    {
-                        if (_currentStateOfField[scanPoint.Row, scanPoint.Column] != CellStatus.Empty)
-                        {
-                            neighbours++;
-                        }
-                    }
+            for (int i = 0; i < _rows; i++)
+            {
+                for (int j = 0; j < _columns; j++)
+                {
+                    _currentStateOfField[i, j] = temporaryStateOfField[i, j];
                 }
             }
 
-            return neighbours;
-
-            bool IsPointValid(PointOnBoard scanPoint)
-            {
-                return !(scanPoint.Column == column && scanPoint.Row == row);
-            }
+            Generation++;
         }
-
+        
         public void Show()
         {
             Console.Clear();
@@ -182,8 +159,15 @@ namespace ConwayLife
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("---Statistics---");
-            Console.WriteLine($"Current generation: {_generation}");
-            Console.WriteLine($"Alive cells: {NumberOfObjects()}");
+
+            var needToSkipCurrentGenDisplay = CycleAchieved || AllAreDead;
+
+            if (!needToSkipCurrentGenDisplay)
+            {
+                Console.WriteLine($"Current generation: {_generation}");
+            }
+
+            Console.WriteLine($"Alive cells: {AliveCells}");
 
             void PrintLine(int rowNumber)
             {
@@ -212,25 +196,6 @@ namespace ConwayLife
             void PrintHorizontalBorder()
             {
                 Console.WriteLine(new string(HorizontalBorderSymbol, _columns + 2));
-            }
-
-            int NumberOfObjects()
-            {
-                var number = 0;
-                foreach (var item in _currentStateOfField)
-                {
-                    if (item != CellStatus.Empty)
-                    {
-                        number++;
-                    }
-                }
-
-                if (number == 0)
-                {
-                    allDead = true;
-                }
-
-                return number;
             }
         }
 
@@ -303,17 +268,11 @@ namespace ConwayLife
 
                 return horizontalBound;
             }
-        }
+        } // Центрировать паттерн на поле.
 
-        public void ShiftToRight(int n)
+        protected void ShiftToRight(int n)
         {
-            for (int i = 0; i < _rows; i++) // очистка временного массива
-            {
-                for (int j = 0; j < _columns; j++)
-                {
-                    _temporaryStateOfField[i, j] = CellStatus.Empty;
-                }
-            }
+            var temporaryStateOfField = new CellStatus[_rows, _columns];
 
             for (int i = 0; i < _rows; i++) // Запись во временный массив новых координат с учётом сдвига.
             {
@@ -321,7 +280,7 @@ namespace ConwayLife
                 {
                     if (_currentStateOfField[i, j] != CellStatus.Empty)
                     {
-                        _temporaryStateOfField[i, j + n] = _currentStateOfField[i, j];
+                        temporaryStateOfField[i, j + n] = _currentStateOfField[i, j];
                     }
                 }
             }
@@ -330,20 +289,14 @@ namespace ConwayLife
             {
                 for (int j = 0; j < _columns; j++)
                 {
-                    _currentStateOfField[i, j] = _temporaryStateOfField[i, j];
+                    _currentStateOfField[i, j] = temporaryStateOfField[i, j];
                 }
             }
         }
 
-        public void ShiftDown(int n)
+        protected void ShiftDown(int n)
         {
-            for (int i = 0; i < _rows; i++) // очистка временного массива
-            {
-                for (int j = 0; j < _columns; j++)
-                {
-                    _temporaryStateOfField[i, j] = CellStatus.Empty;
-                }
-            }
+            var temporaryStateOfField = new CellStatus[_rows, _columns];
 
             for (int i = 0; i < _rows; i++) // Запись во временный массив новых координат с учётом сдвига.
             {
@@ -351,7 +304,7 @@ namespace ConwayLife
                 {
                     if (_currentStateOfField[i, j] != CellStatus.Empty)
                     {
-                        _temporaryStateOfField[i + n, j] = _currentStateOfField[i, j];
+                        temporaryStateOfField[i + n, j] = _currentStateOfField[i, j];
                     }
                 }
             }
@@ -360,9 +313,43 @@ namespace ConwayLife
             {
                 for (int j = 0; j < _columns; j++)
                 {
-                    _currentStateOfField[i, j] = _temporaryStateOfField[i, j];
+                    _currentStateOfField[i, j] = temporaryStateOfField[i, j];
                 }
             }
+        }
+
+        public void FillHashDict()
+        {
+            var hash = GetMyHashCode();
+            
+            if (_dictionary.ContainsKey(hash)) // Если данный хэш уже встречался...
+            {
+                CycleAchieved = true; // ...возвести флаг цикл достигнут.               
+                CycleLength = Generation - _dictionary[hash]; // Вычислить длину цикла. Это разница между текущим поколением и поколением, когда данный хэш впервые встретился.
+            }
+            else // Если данный хэш никогда не встречался - добавить его в словарь как ключ. Значение - номер поколения, на котором он встретился.
+            {
+                _dictionary.Add(hash, Generation);
+            }
+        }
+
+        public uint GetMyHashCode()
+        {
+            var currentStateOfField = ConvertCurrentStateOfField();
+
+            return (uint)currentStateOfField.GetHashCode();
+        }
+
+        private string ConvertCurrentStateOfField()
+        {
+            StringBuilder sb = new StringBuilder(_rows * _columns);
+
+            foreach (var item in _currentStateOfField)
+            {
+                sb.Append((int)item);
+            }
+
+            return sb.ToString();
         }
     }
 }
