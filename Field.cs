@@ -19,21 +19,19 @@ namespace ConwayLife
         private CellStatus[,] _currentStateOfField;
         private long _generation;
         private Dictionary<uint, long> _dictionary;
-        private Func<int, int, CellStatus[,], Func<int, int, int, int, CellStatus[,], int>, CellStatus[,]> _surviveDieOrBorn;
-        private Func<int, int, int, int, CellStatus[,], int> _getNeighboiursNumber;
+        private IRules _setOfRules;
+        
 
         public Field(
             int rows, 
             int columns, 
-            Func<int, int, CellStatus[,], Func<int, int, int, int, CellStatus[,], int>, CellStatus[,]> surviveDieOrBorn, 
-            Func<int, int, int, int, CellStatus[,], int> getNeighboiursNumber)
+            IRules setOfRules)
         {
             _dictionary = new Dictionary<uint, long>();
             _rows = rows;
             _columns = columns;
             _generation = 1;
-            _surviveDieOrBorn = surviveDieOrBorn;
-            _getNeighboiursNumber = getNeighboiursNumber;
+            _setOfRules = setOfRules;            
             _currentStateOfField = new CellStatus[_rows, _columns];
         }
 
@@ -132,7 +130,7 @@ namespace ConwayLife
 
         public void CalculateNextGeneration()
         {
-            var temporaryStateOfField = _surviveDieOrBorn(_rows, _columns, _currentStateOfField, _getNeighboiursNumber);
+            var temporaryStateOfField = _setOfRules.SurviveDieOrBorn(_rows, _columns, _currentStateOfField);
 
             for (int i = 0; i < _rows; i++)
             {
