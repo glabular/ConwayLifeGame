@@ -7,36 +7,40 @@ namespace ConwayLife
     {
         static void Main(string[] args)
         {
-            IRules rules = new RulesFor4();
+            IRules rules = new RulesFor8();
+            var shift = 0;
+            const int StepsPerSecond = 25;
 
-            var size = 31;
-            Field life = new Field(size, size, rules);
-            life.InitializeLife(Patterns.ObliqueCross(15));
+            var size = 30;
+            Field life = new Field(size, size * 7, rules);
+            life.InitializeLife(Patterns.GliderGun);
             //life.SetImmortalCell(4, 4);
 
             life.Center();
-            life.Show();
-            
+            Render.Show(life, shift);
             Console.ReadKey();
 
             while (life.AllAreDead != true)
             {
-                if (life.CycleAchieved)
-                {
-                    Console.WriteLine($"The life got cycled on generation №{life.Generation}.");
-                    Console.WriteLine($"The length of the cycle: {life.CycleLength}.");
-                }
-
-                Thread.Sleep(100);
-
                 life.MakeMove();
-            } 
+                Render.Show(life, shift);
+                Sleep(StepsPerSecond, life);
+            }
+        }
 
-            if (life.AllAreDead)
+        private static void Sleep(int stepsPerSecond, Field life)
+        {
+            const int MicrosecondsPerCell = 61;
+
+            var oneStepDuratonMicroseconds = 1000 * 1000 / stepsPerSecond;
+            var renderTimeMicroseconds = MicrosecondsPerCell * life.ChangedCellsConut;
+            var sleepTimeMicroseconds = oneStepDuratonMicroseconds - renderTimeMicroseconds;
+
+            if (sleepTimeMicroseconds > 0)
             {
-                Console.WriteLine($"The life got extinct on generation №{life.Generation}.");
-                Console.Write("Press any key...");
-                Console.ReadKey();
+                long sleepTimeTicks = sleepTimeMicroseconds * 10;
+                var sleepDuration = new TimeSpan(sleepTimeTicks);
+                Thread.Sleep(sleepDuration);
             }
         }
     }

@@ -31,10 +31,9 @@ x
 xxx
 ";
         public static string Mine => @"
-x
- x
-  x
-   x
+xxxx
+xxxxxxxx
+xxxx
 ";
 
         public static string Line(int n)

@@ -8,11 +8,11 @@ namespace ConwayLife
 {
     public class Field
     {
-        private const char VerticalBorderSymbol = '║';
-        private const char HorizontalBorderSymbol = '=';
-        private const char AliveCellSymbol = 'X'; // '¤' '■'
-        private const char ImmortalCellSymbol = '#'; //
-        private const char EmptyCellSymbol = ' '; //
+        public const char VerticalBorderSymbol = '║';
+        public const char HorizontalBorderSymbol = '=';
+        public const char AliveCellSymbol = 'X'; // '¤' '■'
+        public const char ImmortalCellSymbol = '#'; //
+        public const char EmptyCellSymbol = ' '; //
 
         private int _rows;
         private int _columns;
@@ -33,7 +33,19 @@ namespace ConwayLife
             _generation = 1;
             _setOfRules = setOfRules;            
             _currentStateOfField = new CellStatus[_rows, _columns];
+
+            ChangedCells = new bool[_rows, _columns];
+            for (int i = 0; i < _rows; i++)
+            {
+                for (int j = 0; j < _columns; j++)
+                {
+                    ChangedCells[i, j] = true;
+                }
+            }
         }
+
+        public int Rows => _rows;
+        public int Columns => _columns;
 
         public int AliveCells // Alive cell is every cell except empty one. Immortal cells are alive cells too.
         {
@@ -55,6 +67,8 @@ namespace ConwayLife
 
         public long CycleLength { get; private set; }
 
+        public CellStatus[,] CurrentStateOfField => _currentStateOfField;
+
         public bool AllAreDead => AliveCells == 0;
 
         public bool CycleAchieved { get; private set; }
@@ -75,10 +89,28 @@ namespace ConwayLife
             }
         }
 
+        public bool[,] ChangedCells { get; private set; }
+
+        public int ChangedCellsConut
+        {
+            get
+            {
+                var changedCellsNumber = 0;
+
+                foreach (var item in ChangedCells)
+                {
+                    if (item)
+                    {
+                        changedCellsNumber++;
+                    }
+                }
+
+                return changedCellsNumber;
+            }
+        }
+
         public void MakeMove()
         {
-            Show();
-
             if (!CycleAchieved)
             {
                 FillHashDict();
@@ -131,72 +163,23 @@ namespace ConwayLife
         public void CalculateNextGeneration()
         {
             var temporaryStateOfField = _setOfRules.SurviveDieOrBorn(_rows, _columns, _currentStateOfField);
+            ChangedCells = new bool[_rows, _columns];
 
             for (int i = 0; i < _rows; i++)
             {
                 for (int j = 0; j < _columns; j++)
                 {
+                    ChangedCells[i, j] = _currentStateOfField[i, j] != temporaryStateOfField[i, j];
                     _currentStateOfField[i, j] = temporaryStateOfField[i, j];
                 }
             }
 
             Generation++;
         }
-        
-        public void Show()
-        {
-            Console.Clear();
-            PrintHorizontalBorder();
 
-            for (int i = 0; i < _rows; i++)
-            {
-                PrintLine(i);
-            }
-
-            PrintHorizontalBorder();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine("---Statistics---");
-
-            var needToSkipCurrentGenDisplay = CycleAchieved || AllAreDead;
-
-            if (!needToSkipCurrentGenDisplay)
-            {
-                Console.WriteLine($"Current generation: {_generation}");
-            }
-
-            Console.WriteLine($"Alive cells: {AliveCells}");
-
-            void PrintLine(int rowNumber)
-            {
-                Console.Write(VerticalBorderSymbol);
-
-                for (int i = 0; i < _columns; i++)
-                {
-                    switch (_currentStateOfField[rowNumber, i])
-                    {
-                        case CellStatus.Alive:
-                            Console.Write(AliveCellSymbol);
-                            break;
-                        case CellStatus.Immortal:
-                            Console.Write(ImmortalCellSymbol);
-                            break;
-                        case CellStatus.Empty:
-                            Console.Write(EmptyCellSymbol);
-                            break;
-                    }
-                }
-
-                Console.Write(VerticalBorderSymbol);
-                Console.WriteLine();
-            }
-
-            void PrintHorizontalBorder()
-            {
-                Console.WriteLine(new string(HorizontalBorderSymbol, _columns + 2));
-            }
-        }
-
+        /// <summary>
+        /// Центрирует паттерн на поле.
+        /// </summary>
         public void Center()
         {
             var rightShift = (_columns - GetVerticalBound()) / 2;
@@ -266,7 +249,7 @@ namespace ConwayLife
 
                 return horizontalBound;
             }
-        } // Центрировать паттерн на поле.
+        }
 
         protected void ShiftToRight(int n)
         {
