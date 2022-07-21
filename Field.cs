@@ -47,6 +47,8 @@ namespace ConwayLife
         public int Rows => _rows;
         public int Columns => _columns;
 
+        public string RulesDescription => _setOfRules.Description;
+
         public int AliveCells // Alive cell is every cell except empty one. Immortal cells are alive cells too.
         {
             get

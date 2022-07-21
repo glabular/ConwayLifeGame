@@ -45,6 +45,7 @@ namespace ConwayLife
             }
 
             var indent = 3;
+            WriteAt($"{field.RulesDescription}", field.Rows + indent++, 0, horizontalShift);
             WriteAt("---Statistics---", field.Rows + indent++, 0, horizontalShift);
             WriteAt($"Current generation: {field.Generation}", field.Rows + indent++, 0, horizontalShift);
             WriteAt($"Alive cells: {field.AliveCells}     ", field.Rows + indent++, 0, horizontalShift);

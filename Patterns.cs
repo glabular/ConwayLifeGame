@@ -21,9 +21,19 @@ xxx
 ";
 
         public static string Custom => @"
-xxxx
-xxxxxxxx
-xxxx
+x
+ x
+  x
+   x
+    x
+     x
+      x
+       x
+        x
+         x
+          x
+           x
+            x
 ";
 
         public static string Line(int n)

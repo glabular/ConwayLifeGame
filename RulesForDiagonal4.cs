@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ConwayLife
 {
-    public class RulesFor4 : IRules
+    public class RulesForDiagonal4 : IRules
     {
-        public string Description => "Four straight neighbours.";
+        public string Description => "Four diagonal neighbours.";
 
         public CellStatus[,] SurviveDieOrBorn(
             int totalRows,
@@ -46,50 +46,33 @@ namespace ConwayLife
         private int GetNeighboursNumber(int currentRowIndex, int currentColumnIndex, int totalRows, int totalColumns, CellStatus[,] currentStateOfField)
         {
             int neighbours = 0;
-
-            if (HasNeighbourRow(-1))
+            foreach (var x in new[] { -1, 1 })
             {
-                neighbours++;
-            }
+                foreach (var y in new[] { -1, 1 })
+                {
+                    var scanPoint = new PointOnBoard
+                    {
+                        Column = (currentColumnIndex + x + totalColumns) % totalColumns,
+                        Row = (currentRowIndex + y + totalRows) % totalRows
+                    };
 
-            if (HasNeighbourRow(1))
-            {
-                neighbours++;
-            }
-
-            if (HasNeighbourColumn(-1))
-            {
-                neighbours++;
-            }
-
-            if (HasNeighbourColumn(1))
-            {
-                neighbours++;
+                    if (IsPointValid(scanPoint)) // если проверяемая точка не является равной текущей точке.
+                    {
+                        if (currentStateOfField[scanPoint.Row, scanPoint.Column] != CellStatus.Empty)
+                        {
+                            neighbours++;
+                        }
+                    }
+                }
             }
 
             return neighbours;
 
-            bool HasNeighbourRow(int index)
+            bool IsPointValid(PointOnBoard scanPoint)
             {
-                var scanPoint = new PointOnBoard
-                {
-                    Column = (currentColumnIndex + index + totalColumns) % totalColumns,
-                    Row = currentRowIndex
-                };
-
-                return currentStateOfField[scanPoint.Row, scanPoint.Column] != CellStatus.Empty;
-            }
-
-            bool HasNeighbourColumn(int index)
-            {
-                var scanPoint = new PointOnBoard
-                {
-                    Column = currentColumnIndex,
-                    Row = (currentRowIndex + index + totalRows) % totalRows
-                };
-
-                return currentStateOfField[scanPoint.Row, scanPoint.Column] != CellStatus.Empty;
+                return !(scanPoint.Column == currentColumnIndex && scanPoint.Row == currentRowIndex);
             }
         }
     }
 }
+

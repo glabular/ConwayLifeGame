@@ -8,6 +8,8 @@ namespace ConwayLife
 {
     public class RulesFor8 : IRules
     {
+        public string Description => "Eight neighbours";
+
         public CellStatus[,] SurviveDieOrBorn(
             int totalRows,
             int totalColumns,

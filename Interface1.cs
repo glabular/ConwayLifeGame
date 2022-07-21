@@ -8,6 +8,8 @@ namespace ConwayLife
 {
     public interface IRules
     {
+        string Description { get; }
+
         CellStatus[,] SurviveDieOrBorn(int totalRows, int totalColumns, CellStatus[,] currentStateOfField);
     }
 }
