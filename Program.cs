@@ -7,24 +7,39 @@ namespace ConwayLife
     {
         static void Main(string[] args)
         {
-            IRules rules = new RulesFor8();
-            var shift = 0;
+            IRules rules8 = new RulesFor8();
+            IRules rules4 = new RulesFor4();
+
             const int StepsPerSecond = 25;
 
-            var size = 30;
-            Field life = new Field(size, size * 7, rules);
-            life.InitializeLife(Patterns.GliderGun);
+            var size = 51;
+            var shift = size + 2 + 20;
+
+            Field life8 = new Field(size, size, rules8);
+            life8.InitializeLife(Patterns.HollowSquare(31, 2));
+
+            Field life4 = new Field(size, size, rules4);
+            life4.InitializeLife(Patterns.HollowSquare(31, 2));
             //life.SetImmortalCell(4, 4);
 
-            life.Center();
-            Render.Show(life, shift);
+            life8.Center();
+            Render.Show(life8);
+
+            life4.Center();
+            Render.Show(life4, shift);
+
             Console.ReadKey();
 
-            while (life.AllAreDead != true)
+            while (life8.AllAreDead != true )
             {
-                life.MakeMove();
-                Render.Show(life, shift);
-                Sleep(StepsPerSecond, life);
+                life8.MakeMove();
+                Render.Show(life8);
+
+                life4.MakeMove();
+                Render.Show(life4, shift);
+
+                Thread.Sleep(200);
+                //Sleep(StepsPerSecond, life8);
             }
         }
 
