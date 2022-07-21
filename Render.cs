@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace ConwayLife
 {
-    public static class Render
+    public class Render
     {
-        private static bool _areBordersDrawn = false;
-        public static void Show(Field field, int horizontalShift = 0)
+        private bool _areBordersDrawn = false;
+        public void Show(Field field, int horizontalShift = 0)
         {
             Console.CursorVisible = false;
 
@@ -62,12 +62,12 @@ namespace ConwayLife
             }
         }
 
-        private static void WriteAt(char c, int row, int column, int horizontalShift = 0)
+        private void WriteAt(char c, int row, int column, int horizontalShift = 0)
         {
             WriteAt($"{c}", row, column, horizontalShift);            
         }
 
-        private static void WriteAt(string s, int row, int column, int horizontalShift = 0)
+        private void WriteAt(string s, int row, int column, int horizontalShift = 0)
         {
             try
             {
@@ -85,7 +85,7 @@ namespace ConwayLife
             }
         }
 
-        private static void PrintBorders(int rows, int columns, int horizontalShift = 0, Field field = null)
+        private void PrintBorders(int rows, int columns, int horizontalShift = 0, Field field = null)
         {
             _areBordersDrawn = true;
             var horizontalBorder = new string(Field.HorizontalBorderSymbol, columns + 2);

@@ -11,6 +11,9 @@ namespace ConwayLife
             IRules rules4 = new RulesFor4();
             IRules diagonalRules4 = new RulesForDiagonal4();
 
+            var renderObject1 = new Render();
+            var renderObject2 = new Render();
+
             const int StepsPerSecond = 25;
 
             var size = 51;
@@ -30,10 +33,10 @@ namespace ConwayLife
             //Render.Show(life8);
 
             life4.Center();
-            Render.Show(life4, shift);
+            renderObject1.Show(life4, shift);
 
             life4diag.Center();
-            Render.Show(life4diag);
+            renderObject2.Show(life4diag);
 
             Console.ReadKey();
 
@@ -43,10 +46,10 @@ namespace ConwayLife
                 //Render.Show(life8);
 
                 life4.MakeMove();
-                Render.Show(life4, shift);
+                renderObject1.Show(life4, shift);
 
                 life4diag.MakeMove();
-                Render.Show(life4diag);
+                renderObject2.Show(life4diag);
 
                 Thread.Sleep(200);
                 //Sleep(StepsPerSecond, life8);
