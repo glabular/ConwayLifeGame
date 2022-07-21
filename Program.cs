@@ -13,17 +13,17 @@ namespace ConwayLife
 
             const int StepsPerSecond = 25;
 
-            var size = 25;
+            var size = 51;
             var shift = size + 2 + 20;
 
             //Field life8 = new Field(size, size, rules8);
             //life8.InitializeLife(Patterns.HollowSquare(31, 2));
 
             Field life4 = new Field(size, size, rules4);
-            life4.InitializeLife(Patterns.Square(15));
+            life4.InitializeLife(Patterns.Custom);
 
             Field life4diag = new Field(size, size, diagonalRules4);
-            life4diag.InitializeLife(Patterns.Square(15));
+            life4diag.InitializeLife(Patterns.Custom);
 
 
             //life8.Center();

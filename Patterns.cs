@@ -21,19 +21,17 @@ xxx
 ";
 
         public static string Custom => @"
-x
- x
-  x
-   x
-    x
      x
-      x
-       x
-        x
-         x
-          x
-           x
-            x
+    x x
+   x   x
+  x     x
+ x       x
+x         x
+ x       x
+  x     x
+   x   x
+    x x
+     x
 ";
 
         public static string Line(int n)
@@ -41,6 +39,10 @@ x
             return NewLine + new string('x', n) + NewLine;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sideSize">Length of one cross beam. Total size of the created cross will be (2 * sideSize + 1)</param>
         public static string StraightCross(int sideSize)
         {
             var pattern = new StringBuilder();
@@ -65,6 +67,10 @@ x
             return pattern.ToString();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sideSize">Length of one cross beam. Total size of the created cross will be (2 * sideSize + 1)</param>
         public static string ObliqueCross(int sideSize)
         {
             var pattern = new StringBuilder();
@@ -96,6 +102,10 @@ x
             return pattern.ToString();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sideSize">Length of one cross beam. Total size of the created cross will be (2 * sideSize + 1)</param>
         public static string EightCross(int sideSize)
         {
             var straightCrossPattern = StraightCross(sideSize);
@@ -135,7 +145,33 @@ x
             return pattern.ToString();
         }
 
-        public static string CubeWithImortalCorners(int n)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sideSize">Length of side. Total size of the created diamond will be (2 * sideSize - 1)</param>
+        public static string Diamond(int sideSize)
+        {
+            var pattern = new StringBuilder();
+            pattern.Append(NewLine);
+
+            for (var i = 0; i < (sideSize - 1); i++)
+            {
+                pattern.Append(new string(' ', sideSize - i - 1));
+                pattern.AppendLine(new string('x', 2 * i + 1));
+            }
+
+            pattern.AppendLine(new string('x', 2 * (sideSize - 1) + 1));
+
+            for (var i = (sideSize - 1) - 1; i >= 0; i--)
+            {
+                pattern.Append(new string(' ', sideSize - i - 1));
+                pattern.AppendLine(new string('x', 2 * i + 1));
+            }
+
+            return pattern.ToString();
+        }
+
+        public static string SquareWithImortalCorners(int n)
         {
             var pattern = new StringBuilder();
             pattern.Append(NewLine);
