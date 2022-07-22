@@ -7,49 +7,26 @@ namespace ConwayLife
     {
         static void Main(string[] args)
         {
-            IRules rules8 = new RulesFor8();
-            IRules rules4 = new RulesFor4();
-            IRules diagonalRules4 = new RulesForDiagonal4();
-
-            var renderObject1 = new Render();
-            var renderObject2 = new Render();
-
+            
+            IRules ruleOf16 = new RulesFor16();
+            var renderObject3 = new Render();
             const int StepsPerSecond = 25;
 
-            var size = 51;
+            var size = 25;
             var shift = size + 2 + 20;
 
-            //Field life8 = new Field(size, size, rules8);
-            //life8.InitializeLife(Patterns.HollowSquare(31, 2));
+            Field neighbours16 = new Field(size, size, ruleOf16);
+            neighbours16.InitializeLife(Patterns.Square(3));
 
-            Field life4 = new Field(size, size, rules4);
-            life4.InitializeLife(Patterns.Custom);
-
-            Field life4diag = new Field(size, size, diagonalRules4);
-            life4diag.InitializeLife(Patterns.Custom);
-
-
-            //life8.Center();
-            //Render.Show(life8);
-
-            life4.Center();
-            renderObject1.Show(life4, shift);
-
-            life4diag.Center();
-            renderObject2.Show(life4diag);
+            neighbours16.Center();
+            renderObject3.Show(neighbours16);
 
             Console.ReadKey();
 
-            while (life4diag.AllAreDead != true )
+            while (neighbours16.AllAreDead != true )
             {
-                //life8.MakeMove();
-                //Render.Show(life8);
-
-                life4.MakeMove();
-                renderObject1.Show(life4, shift);
-
-                life4diag.MakeMove();
-                renderObject2.Show(life4diag);
+                neighbours16.MakeMove();
+                renderObject3.Show(neighbours16);
 
                 Thread.Sleep(200);
                 //Sleep(StepsPerSecond, life8);
