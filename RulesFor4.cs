@@ -10,18 +10,30 @@ namespace ConwayLife
     {
         public string Description => "Four straight neighbours.";
 
+        public bool IsCalculationAsync { get; set; } = false;
+
         public CellStatus[,] SurviveDieOrBorn(
             int totalRows,
             int totalColumns,
             CellStatus[,] currentStateOfField)
         {
-            CellStatus[,] temporaryStateOfField = new CellStatus[totalRows, totalColumns];
+            CellStatus[,] temporaryStateOfField;
+
+            if (IsCalculationAsync)
+            {
+                temporaryStateOfField = (CellStatus[,])currentStateOfField.Clone();
+            }
+            else
+            {
+                temporaryStateOfField = new CellStatus[totalRows, totalColumns];
+            }
 
             for (int currentRowIndex = 0; currentRowIndex < totalRows; currentRowIndex++)
             {
                 for (int currentColumnIndex = 0; currentColumnIndex < totalColumns; currentColumnIndex++)
                 {
-                    var numberOfNeighbours = GetNeighboursNumber(currentRowIndex, currentColumnIndex, totalRows, totalColumns, currentStateOfField);
+                    var fieldForNeighboursCalculation = IsCalculationAsync ? temporaryStateOfField : currentStateOfField;
+                    int numberOfNeighbours = GetNeighboursNumber(currentRowIndex, currentColumnIndex, totalRows, totalColumns, fieldForNeighboursCalculation);
 
                     switch (numberOfNeighbours)
                     {

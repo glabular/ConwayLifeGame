@@ -10,6 +10,8 @@ namespace ConwayLife
     {
         public string Description => "Four diagonal neighbours.";
 
+        public bool IsCalculationAsync { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
         public CellStatus[,] SurviveDieOrBorn(
             int totalRows,
             int totalColumns,

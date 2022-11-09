@@ -8,25 +8,26 @@ namespace ConwayLife
         static void Main(string[] args)
         {
             
-            IRules ruleOf16 = new RulesFor16();
+            IRules rules = new RulesFor8();
+            rules.IsCalculationAsync = true;
             var renderObject3 = new Render();
             const int StepsPerSecond = 25;
 
-            var size = 25;
+            var size = 51;
             var shift = size + 2 + 20;
 
-            Field neighbours16 = new Field(size, size, ruleOf16);
-            neighbours16.InitializeLife(Patterns.Square(3));
+            Field neighbours4 = new Field(size, size, rules);
+            neighbours4.InitializeLife(Patterns.ObliqueCross(25));
 
-            neighbours16.Center();
-            renderObject3.Show(neighbours16);
+            neighbours4.Center();
+            renderObject3.Show(neighbours4);
 
             Console.ReadKey();
 
-            while (neighbours16.AllAreDead != true )
+            while (neighbours4.AllAreDead != true )
             {
-                neighbours16.MakeMove();
-                renderObject3.Show(neighbours16);
+                neighbours4.MakeMove();
+                renderObject3.Show(neighbours4);
 
                 Thread.Sleep(200);
                 //Sleep(StepsPerSecond, life8);

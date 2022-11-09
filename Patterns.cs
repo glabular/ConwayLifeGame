@@ -21,17 +21,9 @@ xxx
 ";
 
         public static string Custom => @"
-     x
-    x x
-   x   x
-  x     x
- x       x
-x         x
- x       x
-  x     x
-   x   x
-    x x
-     x
+ x
+xxx
+x
 ";
 
         public static string Line(int n)
@@ -210,6 +202,31 @@ x         x
 
                 return GeneratePlainPatternFromEncodedLines(encodedLines);
             }
+        }
+
+        /// <summary>
+        /// Random pattern within n*n square
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        public static string Random(int n)  
+        {
+            var rnd = new Random();
+            var pattern = new StringBuilder();
+            pattern.Append(NewLine);
+
+            for (var i = 0; i < n; i++)
+            {
+                for (var j = 0; j < n; j++)
+                {
+                    var symbol = rnd.Next(2) == 0 ? ' ' : 'x';
+                    pattern.Append(symbol);
+                }
+
+                pattern.AppendLine();
+            }
+
+            return pattern.ToString();
         }
 
         #region Operations on patterns

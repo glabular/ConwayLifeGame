@@ -10,6 +10,8 @@ namespace ConwayLife
     {
         public string Description => "Sixteen neighbours.";
 
+        public bool IsCalculationAsync { get; set; }
+
         public CellStatus[,] SurviveDieOrBorn(
             int totalRows,
             int totalColumns,
